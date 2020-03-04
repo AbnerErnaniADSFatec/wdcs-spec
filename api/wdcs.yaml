@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  description: Web Data Cubes Service
+  version: "0.2.0"
+  title: wdcs
+  contact:
+    email: rolf.simoes@inpe.br
+    name: Rolf Simoes
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /:
+    get:
+      summary: |
+        Shows the service status and version
+      responses:
+        '200':
+          description: 'shows service status and version.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/status'
+  /list_cubes:
+    get:
+      summary: |
+        Lists all available cubes in the service
+      description: |
+        Returns a list of all available cubes in wdcs service
+      responses:
+        '200':
+          description: |
+            lists available cubes entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listCubes'
+        '500':
+          description: |
+            Error in STAC request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /describe_cube:
+    get:
+      summary: |
+        Describe a cube.
+      description: |
+        Return cube's properties.
+      parameters:
+        - in: query
+          name: name
+          description: |
+            The name of the cube to be described
+          schema:
+            type: string
+            example: 'C64m'
+          required: true
+      responses:
+        '200':
+          description: |
+            Describes a cube entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/describeCube'
+        '400':
+          description: |
+            Bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /get_cube:
+    get:
+      summary: |
+        Fetches the cube images' references and slices the temporal dimension
+      description: |
+        Return cube's images references organized in slices
+      parameters:
+        - in: query
+          name: name
+          description: |
+            Name of the cube to be fetched and sliced
+          schema:
+            type: string
+            example: 'C64m'
+          required: true
+        - in: query
+          name: bands
+          description: |
+            Returns only the informed bands
+          schema:
+            type: array
+            items:
+              type: string
+            example:
+              - red
+              - ndvi
+              - evi
+        - in: query
+          name: interval
+          description: |
+            Returns only images from spanned by the interval
+          schema:
+            type: string
+            format: datetime-interval
+            example: |
+              2000-09-01/2019-09-01
+              ../2015-01-01
+              2018-07-15/..
+        - in: query
+          name: bbox
+          description: |
+            Returns only images intersecting the bounding box
+          schema:
+            type: array
+            items:
+              type: number
+              format: float
+            minItems: 4
+            maxItems: 4
+            example:
+              - -55.0
+              - -10.0
+              - -50.0
+              - -5.0
+        - in: query
+          name: slices
+          description: |
+            Returns slices of cube in temporal dimension
+          schema:
+            type: string
+            format: datetime-interval
+            example: '2000-09-01/2001-09-01'
+        - in: query
+          name: period
+          description: |
+            Period to which slices' start date is slided on temporal dimension
+            MUST comply with the regular expression '^P[0-9]+(D|W|M|Y)$'
+          schema:
+            type: string
+            format: period
+            example: 'P1Y'
+      responses:
+        '200':
+          description: |
+            describe a cube entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getCube'
+        '400':
+          description: |
+            bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+components:
+  schemas:
+    error:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 500
+        description:
+          type: string
+          example: 'bad input parameter'
+    status:
+      type: object
+      required:
+        - wdcs_version
+        - wdcs_provider
+      properties:
+        wdcs_version:
+          type: string
+          example: '0.1.2'
+        wdcs_provider:
+          type: string
+          example: 'INPE'
+        description:
+          type: string
+          example: 'Brazil Data Cube'
+    listCubes:
+      type: object
+      required:
+        - wdcs_version
+        - wdcs_provider
+        - list_cubes
+      properties:
+        wdcs_version:
+          type: string
+          example: '0.1.2'
+        wdcs_provider:
+          type: string
+          example: 'INPE'
+        list_cubes:
+          type: object
+          additionalProperties:
+            type: string
+            example: 'http://brazildatacube.dpi.inpe.br/wdcs/describe_cube?name=C64M'
+    describeCube:
+      type: object
+      required:
+        - wdcs_version
+        - wdcs_provider
+        - describe_cube
+      properties:
+        wdcs_version:
+          type: string
+          example: '0.1.2'
+        wdcs_provider:
+          type: string
+          example: 'INPE'
+        describe_cube:
+          type: object
+          additionalProperties:
+            type: object
+            required:
+              - name
+              - description
+              - crs
+              - bbox
+              - bands
+              - tiles
+            properties:
+              name:
+                type: string
+                example: 'C64M'
+              description:
+                type: string
+                example: 'CBERS 64m monthly'
+              crs:
+                type: string
+                example: '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs '
+              bbox:
+                type: array
+                items:
+                  type: number
+                  format: float
+                example:
+                  - -55.0
+                  - -10.0
+                  - -50.0
+                  - -5.0
+              bands:
+                type: object
+                additionalProperties:
+                  type: object
+                  schema:
+                    $ref: '#/components/schemas/describeCubeEntry'
+    describeCubeEntry:
+      required:
+        - name
+        - min
+        - max
+        - fill
+        - scale
+      properties:
+        name:
+          type: string
+          example: NDVI
+        min:
+          type: number
+          format: float
+          example: -2000.0
+        max:
+          type: number
+          format: float
+          example: 10000.0
+        fill:
+          type: number
+          format: float
+          example: -3000.0
+        scale:
+          type: number
+          format: float
+          example: 0.0001
+    getCube:
+      type: object
+      required:
+        - wdcs_version
+        - wdcs_provider
+        - get_cube
+      properties:
+        wdcs_version:
+          type: string
+          example: '0.1.2'
+        wdcs_provider:
+          type: string
+          example: 'INPE'
+        get_cube:
+          type: object
+          additionalProperties:
+            type: object
+            required:
+              - timeline
+              - tiles
+            properties:
+              timeline:
+                type: array
+                items:
+                  type: string
+                  format: date-time
+                example:
+                  - '2000-09-01'
+                  - '2000-10-01'
+              tiles:
+                type: object
+                required:
+                  - bbox
+                  - bands
+                properties:
+                  bbox:
+                    type: array
+                    items:
+                      type: number
+                      format: float
+                    example:
+                      - -55.0
+                      - -10.0
+                      - -50.0
+                      - -5.0
+                  bands:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                        - 'http://example.com/asset_geo1.tif'
+                        - 'http://example.com/asset_geo2.tif'
+servers:
+  - url: http://brazildatacube.dpi.inpe.br/wdcs
+    description: 'INPE wdcs service'

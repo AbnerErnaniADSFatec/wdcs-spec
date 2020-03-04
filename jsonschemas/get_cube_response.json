@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://www.esensing.dpi.inpe.br/wdcs/get_cubes_response.json",
+  "definitions": {
+    "get_cube": {
+      "type": "object",
+      "patternProperties": {
+        "^(\\d{4}-\\d{2}-\\d{2}/\\d{4}-\\d{2}-\\d{2})$": {
+          "type": "object",
+          "patternProperties": {
+            "^(.+)$": {
+              "$ref": "#/definitions/slice"
+            }
+          }
+        }
+      }
+    },
+    "slice": {
+      "type": "object",
+      "required": [
+        "bands",
+        "timeline"
+      ],
+      "properties": {
+        "bands": {
+          "type": "object",
+          "patternProperties": {
+            "^(.+)$": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "wdcs_version",
+    "wdcs_provider",
+    "get_cube"
+  ],
+  "properties": {
+    "wdcs_version": {
+      "type": "string",
+      "const": "0.1.3"
+    },
+    "wdcs_provider": {
+      "type": "string",
+      "example": "INPE"
+    },
+    "describe_cube": {
+      "$ref": "#/definitions/get_cube"
+    }
+  }
+}

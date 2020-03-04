@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://www.esensing.dpi.inpe.br/wdcs/status_response.json",
+  "type": "object",
+  "required": [
+    "wdcs_version",
+    "wdcs_provider"
+  ],
+  "properties": {
+    "wdcs_version": {
+      "type": "string",
+      "example": "0.1.2"
+    },
+    "wdcs_provider": {
+      "type": "string",
+      "example": "INPE"
+    },
+    "description": {
+      "type": "string",
+      "example": "Brazil Data Cube"
+    },
+    "stac_url": {
+      "type": "string",
+      "format": "uri",
+      "example": "http://brazildatacube.dpi.inpe.br/bdc-stac/0.7.0/"
+    }
+  }
+}

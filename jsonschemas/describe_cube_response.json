@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://www.esensing.dpi.inpe.br/wdcs/list_cubes_response.json",
+  "definitions": {
+    "describe_cube": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "crs",
+        "bbox",
+        "bands",
+        "tiles"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "C64M"
+        },
+        "description": {
+          "type": "string",
+          "example": "CBERS 64m monthly"
+        },
+        "crs": {
+          "type": "string",
+          "example": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "example": [-55.0, -10.0, -50.0, -5.0]
+        },
+        "bands": {
+          "type": "object",
+          "patternProperties": {
+            "^(.+)$": {
+              "$ref": "#/definitions/band"
+            }
+          }
+        }
+      }
+    },
+    "band": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "fill",
+        "max",
+        "min",
+        "scale",
+        "mime_type",
+        "data_type",
+        "resolution_x",
+        "resolution_y",
+        "resolution_unit"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "fill": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "scale": {
+          "type": "number"
+        },
+        "mime_type": {
+          "type": "string",
+          "examples": [
+            "image/tiff"
+          ]
+        },
+        "data_type": {
+          "type": "string",
+          "enum": [
+            "Byte",
+            "UInt16",
+            "Int16",
+            "UInt32",
+            "Int32",
+            "Float32",
+            "Float64",
+            "CInt16",
+            "CInt32",
+            "CFloat32",
+            "CFloat64"
+          ]
+        },
+        "resolution_x": {
+          "type": "number"
+        },
+        "resolution_y": {
+          "type": "number"
+        },
+        "resolution_unit": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "wdcs_version",
+    "wdcs_provider",
+    "describe_cube"
+  ],
+  "properties": {
+    "wdcs_version": {
+      "type": "string",
+      "const": "0.1.3"
+    },
+    "wdcs_provider": {
+      "type": "string",
+      "examples": [
+        "INPE",
+        "AWS"
+      ]
+    },
+    "describe_cube": {
+      "$ref": "#/definitions/describe_cube"
+    }
+  }
+}

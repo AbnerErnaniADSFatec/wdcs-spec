@@ -1,0 +1,14 @@
+{
+  "name": "wdcs-spec",
+  "version": "0.2.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "redoc-cli bundle api/wdcs.yaml --output dist/index.html"
+  },
+  "author": "Rolf Simoes",
+  "license": "MIT",
+  "dependencies": {
+    "redoc-cli": "^0.9.4"
+  }
+}
